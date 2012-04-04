@@ -98,3 +98,5 @@ if __name__ == '__main__':
     print asm
 
     print assemble(asm)
+
+    print assemble(":foo SET PC 0x01")
