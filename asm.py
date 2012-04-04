@@ -3,7 +3,7 @@ def disassemble(code):
 
     PC = [0]
 
-    def operand (bits):
+    def operand(bits):
         reg_names = ['A', 'B', 'C', 'X', 'Y', 'Z', 'I', 'J']
 
         if bits <= 0x07:
@@ -18,7 +18,7 @@ def disassemble(code):
 
         if bits == 0x18:
             return 'POP'
-        
+
         if bits == 0x19:
             return 'PEEK'
 
@@ -28,11 +28,11 @@ def disassemble(code):
         if bits == 0x1b:
             return 'SP'
 
-        if bits ==  0x1c:
+        if bits == 0x1c:
             return 'PC'
 
         if bits == 0x1d:
-            return 'O';
+            return 'O'
 
         if bits == 0x1e:
             PC[0] += 1
