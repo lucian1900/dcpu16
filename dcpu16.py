@@ -1,9 +1,9 @@
 def disassemble(code):
+    'Ported from https://gist.github.com/2300590'
+
     PC = [0]
 
     def operand (bits):
-        'Ported from https://gist.github.com/2300590'
-
         reg_names = ['A', 'B', 'C', 'X', 'Y', 'Z', 'I', 'J']
 
         if bits <= 0x07:
@@ -51,7 +51,7 @@ def disassemble(code):
 
     asm = []
 
-    while PC < len(code):
+    while PC[0] < len(code):
         inst = code[PC[0]]
 
         if inst & 0xf == 0:
@@ -63,7 +63,7 @@ def disassemble(code):
                                                  operand((inst >> 4) & 0x3f),
                                                  operand(inst >> 10)))
 
-        PC += 1
+        PC[0] += 1
 
     return '\n'.join(asm)
 
