@@ -74,7 +74,13 @@ def assemble(source):
     labels = {}
     for i, inst in enumerate(insts):
         if inst[0] == ':':
-            labels[inst[1]] = i
+            if isinstance(inst, str):
+                labels[inst[1]] = i
+            else:
+                raise SyntaxError("Expected string label, got: {0}" \
+                                    .format(inst))
+
+    pass
 
     return insts
 
