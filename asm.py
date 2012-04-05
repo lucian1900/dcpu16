@@ -76,11 +76,12 @@ def assemble(source):
         if inst[0] == ':':
             if isinstance(inst, str):
                 labels[inst[1]] = i
+                insts[i] = insts[2:]
             else:
                 raise SyntaxError("Expected string label, got: {0}" \
                                     .format(inst))
 
-    pass
+
 
     return insts
 
@@ -90,6 +91,10 @@ def lex(source):
     separators = [':', ',', '[', ']', '++', '--', '+', '-']
 
     for i, _ in enumerate(lines):
+        comment = lines[i].find(';')
+        if comment != -1:
+            lines[i] = lines[i][:comment]
+
         for s in separators:
             lines[i] = lines[i].replace(s, ' {0} '.format(s))
 
