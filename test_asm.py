@@ -1,4 +1,4 @@
-from asm import disassemble, assemble
+from asm import disassemble, assemble, lex
 
 prog = [0x7c01, 0x0030, 0x7de1, 0x1000, 0x0020, 0x7803, 0x1000, 0xc00d,
         0x7dc1, 0x001a, 0xa861, 0x7c01, 0x2000, 0x2161, 0x2000, 0x8463,
@@ -30,3 +30,7 @@ def test_disassemble():
 
 def test_assemble():
     assert assemble(asm) == prog
+
+
+def test_assemble_comment():
+    assert lex('SET X, 2 ; hello') == [['SET', 'X', ',', '2']]
