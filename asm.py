@@ -69,18 +69,23 @@ def disassemble(code):
 
 
 def assemble(source):
-    toks = tokenize(source)
+    insts = lex(source)
 
-    return toks
+    labels = {}
+    for i, inst in enumerate(insts):
+        if inst[0] == ':':
+            labels[inst[1]] = i
+
+    return insts
 
 
-def tokenize(source):
+def lex(source):
     lines = source.split('\n')
-    tokens = [':', ',', '[', ']', '++', '--', '+', '-']
+    separators = [':', ',', '[', ']', '++', '--', '+', '-']
 
     for i, _ in enumerate(lines):
-        for t in tokens:
-            lines[i] = lines[i].replace(t, ' {0} '.format(t))
+        for s in separators:
+            lines[i] = lines[i].replace(s, ' {0} '.format(s))
 
         lines[i] = lines[i].split()
 
