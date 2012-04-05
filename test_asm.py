@@ -23,6 +23,7 @@ SHL X, 0x4
 SET PC, POP
 SET PC, 0x1a'''
 
+
 def test_disassemble():
     assert disassemble(prog) == asm
 
