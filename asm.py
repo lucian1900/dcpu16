@@ -1,10 +1,15 @@
+basic_op = ['SET', 'ADD', 'SUB', 'MUL', 'DIV', 'MOD', 'SHL', 'SHR', 'AND',
+            'BOR', 'XOR', 'IFE', 'IFN', 'IFG', 'IFB']
+
+reg_names = ['A', 'B', 'C', 'X', 'Y', 'Z', 'I', 'J']
+
+
 def disassemble(code):
     'Ported from https://gist.github.com/2300590'
 
     PC = [0]
 
     def operand(bits):
-        reg_names = ['A', 'B', 'C', 'X', 'Y', 'Z', 'I', 'J']
 
         if bits <= 0x07:
             return reg_names[bits]
@@ -46,9 +51,6 @@ def disassemble(code):
         # literal
         return hex(bits - 0x20)
 
-    basic_op = ['SET', 'ADD', 'SUB', 'MUL', 'DIV', 'MOD', 'SHL', 'SHR', 'AND',
-                'BOR', 'XOR', 'IFE', 'IFN', 'IFG', 'IFB']
-
     asm = []
 
     while PC[0] < len(code):
@@ -70,6 +72,7 @@ def disassemble(code):
 
 def assemble(source):
     insts = lex(source)
+    binary = []
 
     labels = {}
     for i, inst in enumerate(insts):
@@ -81,9 +84,14 @@ def assemble(source):
                 raise SyntaxError("Expected string label, got: {0}" \
                                     .format(inst))
 
+    ops = dict((e, i) for i, e in enumerate(basic_op))
+    ops['JSR'] = 0x01
 
+    for i, inst in enumerate(insts):
+        op = ops[inst[0]]
+        binary.append(op)
 
-    return insts
+    return binary
 
 
 def lex(source):
