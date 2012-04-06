@@ -28,8 +28,12 @@ def test_disassemble():
     assert disassemble(prog) == asm
 
 
+def test_assemble_one():
+    assert lex('SET X, 2') == [['SET', 'X', ',', '2']]
+
+
 def test_assemble_comment():
-    assert lex('SET X, 2 ; hello') == [['SET', 'X', ',', '2']]
+    assert lex('SET X, 2 ; foo') == lex('SET X, 2 ; foo')
 
 
 def test_assemble():
