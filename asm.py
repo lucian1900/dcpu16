@@ -88,12 +88,21 @@ def assemble(source):
                 raise SyntaxError("Expected string label, got: {0}" \
                                     .format(inst))
 
-    ops = dict((e, i) for i, e in enumerate(basic_op))
-    ops['JSR'] = 0x01
+    ops = dict((e, i + 1) for i, e in enumerate(basic_op))
 
     for i, inst in enumerate(insts):
-        op = ops[inst[0]]
-        binary.append(op)
+        if inst[0] not in ops:
+            # non-basic op
+            low = 0x0
+            mid = 0x01 << 4
+        else:
+            # basic op
+            low = ops[inst[0]]
+            mid = 0x0 << 4  # TODO hadle value a
+
+        high = 0x0 << 10 # TODO handle value b
+
+        binary.append(low + mid + high)
 
     return binary
 
