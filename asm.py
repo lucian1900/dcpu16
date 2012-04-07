@@ -85,20 +85,24 @@ def value(toks):
     if toks[0] == '[' and toks[2] == ']' and toks[1] in regs:
         return regs[toks[1]] + 0x08
 
+    if toks[0] == '[' and toks[2] == '+' and toks[4] == ']':
+        return regs[toks[3]] + 0x10, toks[1]
+
     if toks[0] in sregs:
         return sregs[toks[0]]
 
-    # TODO [next word]
-    # TODO next word literal
+    if toks[0] == '[' and toks[2] == ']':
+        return 0x1e, toks[1]
 
     try:
-        literal = int(toks[0])
+        literal = int(toks[0], 16)
     except ValueError:
         raise SyntaxError('Expected literal, got: {0}'.format(toks[0]))
     else:
         if 0x00 < literal < 0x1f:
             return literal + 0x20
         else:
+            # TODO next word literal
             ValueError('Expected 0x00 < literal < 0x1f, got: {0}'.format(
                 literal))
 
