@@ -102,11 +102,9 @@ def value(toks):
         if 0x00 < literal < 0x1f:
             return literal + 0x20
         else:
-            # TODO next word literal
-            ValueError('Expected 0x00 < literal < 0x1f, got: {0}'.format(
-                literal))
+            return 0x1f, literal
 
-    return -1
+    raise SyntaxError("Can't make sense of: {0}".format(toks))
 
 
 def assemble(source):
