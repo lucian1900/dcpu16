@@ -8,6 +8,7 @@ basic_op = ['SET', 'ADD', 'SUB', 'MUL', 'DIV', 'MOD', 'SHL', 'SHR', 'AND',
 reg_names = ['A', 'B', 'C', 'X', 'Y', 'Z', 'I', 'J']
 sreg_names = ['POP', 'PEEK', 'PUSH', 'SP', 'PC', 'O']
 
+
 def disassemble(code):
     'Ported from https://gist.github.com/2300590'
 
@@ -81,11 +82,25 @@ def value(toks):
     if toks[0] in regs:
         return regs[toks[0]]
 
+    if toks[0] == '[' and toks[2] == ']' and toks[1] in regs:
+        return regs[toks[1]] + 0x08
+
     if toks[0] in sregs:
         return sregs[toks[0]]
 
-    if toks[0] == '[' and toks[2] == ']' and toks[1] in regs:
-        return regs[toks[1]] + 0x08
+    # TODO [next word]
+    # TODO next word literal
+
+    try:
+        literal = int(toks[0])
+    except ValueError:
+        raise SyntaxError('Expected literal, got: {0}'.format(toks[0]))
+    else:
+        if 0x00 < literal < 0x1f:
+            return literal + 0x20
+        else:
+            ValueError('Expected 0x00 < literal < 0x1f, got: {0}'.format(
+                literal))
 
     return -1
 
