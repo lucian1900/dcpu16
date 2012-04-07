@@ -1,10 +1,10 @@
 import re
 
 comment_pattern = re.compile(r';.*\n')
+separators = [':', ',', '[', ']', '+', '-']
 
 basic_op = ['SET', 'ADD', 'SUB', 'MUL', 'DIV', 'MOD', 'SHL', 'SHR', 'AND',
             'BOR', 'XOR', 'IFE', 'IFN', 'IFG', 'IFB']
-
 reg_names = ['A', 'B', 'C', 'X', 'Y', 'Z', 'I', 'J']
 
 
@@ -75,12 +75,20 @@ def disassemble(code):
 
 
 def value(toks):
+    regs = dict((e, i) for i, e in enumerate(reg_names))
+
     binary = 0
+    tok = toks[0]
+
+    if tok in regs:
+        pass
 
     return binary
 
 
 def assemble(source):
+    ops = dict((e, i + 1) for i, e in enumerate(basic_op))
+
     insts = lex(source)
     binary = []
 
@@ -94,30 +102,31 @@ def assemble(source):
                 raise SyntaxError("Expected string label, got: {0}" \
                                     .format(inst))
 
-    ops = dict((e, i + 1) for i, e in enumerate(basic_op))
-
     for i, inst in enumerate(insts):
         if inst[0] == 'JSR':
             low = 0x0
-            mid = 0x01 << 4
+            mid = 0x01
+            high = value(inst[1])
         else:
             # basic op
             low = ops[inst[0]]
-            mid = 0x0 << 4  # TODO hadle value a
 
-        high = 0x0 << 10  # TODO handle value b
+            try:
+                comma = inst.index(',')
+            except ValueError:
+                raise SyntaxError("Expected , in {0}".format(' '.join(inst)))
 
-        binary.append(low + mid + high)
+            mid = value(inst[1:comma])
+            high = value(inst[comma + 1:]) << 10
+
+        binary.append(low + (mid << 4) + (high << 10))
 
     return binary
 
 
 def lex(source):
     source = re.sub(comment_pattern, '\n', source)
-
     lines = source.split('\n')
-
-    separators = [':', ',', '[', ']', '++', '--', '+', '-']
 
     for i, _ in enumerate(lines):
         for s in separators:
