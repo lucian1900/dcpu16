@@ -74,6 +74,12 @@ def disassemble(code):
     return '\n'.join(asm)
 
 
+def value(toks):
+    binary = 0
+
+    return binary
+
+
 def assemble(source):
     insts = lex(source)
     binary = []
@@ -91,8 +97,7 @@ def assemble(source):
     ops = dict((e, i + 1) for i, e in enumerate(basic_op))
 
     for i, inst in enumerate(insts):
-        if inst[0] not in ops:
-            # non-basic op
+        if inst[0] == 'JSR':
             low = 0x0
             mid = 0x01 << 4
         else:
@@ -100,7 +105,7 @@ def assemble(source):
             low = ops[inst[0]]
             mid = 0x0 << 4  # TODO hadle value a
 
-        high = 0x0 << 10 # TODO handle value b
+        high = 0x0 << 10  # TODO handle value b
 
         binary.append(low + mid + high)
 
@@ -108,9 +113,10 @@ def assemble(source):
 
 
 def lex(source):
-    source = re.sub(comment_pattern, ' ', source)
+    source = re.sub(comment_pattern, '\n', source)
 
     lines = source.split('\n')
+
     separators = [':', ',', '[', ']', '++', '--', '+', '-']
 
     for i, _ in enumerate(lines):
@@ -119,7 +125,7 @@ def lex(source):
 
         lines[i] = lines[i].split()
 
-    return lines
+    return filter(len, lines)
 
 
 if __name__ == '__main__':
