@@ -6,7 +6,7 @@ separators = [':', ',', '[', ']', '+', '-']
 basic_op = ['SET', 'ADD', 'SUB', 'MUL', 'DIV', 'MOD', 'SHL', 'SHR', 'AND',
             'BOR', 'XOR', 'IFE', 'IFN', 'IFG', 'IFB']
 reg_names = ['A', 'B', 'C', 'X', 'Y', 'Z', 'I', 'J']
-
+sreg_names = ['POP', 'PEEK', 'PUSH', 'SP', 'PC', 'O']
 
 def disassemble(code):
     'Ported from https://gist.github.com/2300590'
@@ -76,18 +76,19 @@ def disassemble(code):
 
 def value(toks):
     regs = dict((e, i) for i, e in enumerate(reg_names))
+    sregs = dict((e, i + 0x18) for i, e in enumerate(sreg_names))
 
-    binary = 0
-    tok = toks[0]
+    if toks[0] in regs:
+        return regs[toks[0]]
 
-    if tok in regs:
-        pass
+    if toks[0] == '[' and toks[2] == ']' and toks[1] in sregs:
+        return sregs[toks[1]]
 
-    return binary
+    return -1
 
 
 def assemble(source):
-    ops = dict((e, i + 1) for i, e in enumerate(basic_op))
+    ops = dict((e, i + 0x1) for i, e in enumerate(basic_op))
 
     insts = lex(source)
     binary = []
