@@ -1,3 +1,7 @@
+import re
+
+comment_pattern = re.compile(r';.*\n')
+
 basic_op = ['SET', 'ADD', 'SUB', 'MUL', 'DIV', 'MOD', 'SHL', 'SHR', 'AND',
             'BOR', 'XOR', 'IFE', 'IFN', 'IFG', 'IFB']
 
@@ -95,14 +99,12 @@ def assemble(source):
 
 
 def lex(source):
+    source = re.sub(comment_pattern, ' ', source)
+
     lines = source.split('\n')
     separators = [':', ',', '[', ']', '++', '--', '+', '-']
 
     for i, _ in enumerate(lines):
-        comment = lines[i].find(';')
-        if comment != -1:
-            lines[i] = lines[i][:comment]
-
         for s in separators:
             lines[i] = lines[i].replace(s, ' {0} '.format(s))
 
