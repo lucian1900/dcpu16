@@ -75,34 +75,39 @@ def disassemble(code):
     return '\n'.join(asm)
 
 
+def literal(source):
+    try:
+        literal = int(source, 16)
+    except ValueError:
+        raise SyntaxError('Expected literal, got: {0}'.format(source))
+    else:
+        return literal
+
+
 def value(toks):
     regs = dict((e, i) for i, e in enumerate(reg_names))
     sregs = dict((e, i + 0x18) for i, e in enumerate(sreg_names))
 
     if toks[0] in regs:
-        return regs[toks[0]]
+        return (regs[toks[0]],)
 
     if toks[0] == '[' and toks[2] == ']' and toks[1] in regs:
-        return regs[toks[1]] + 0x08
+        return (regs[toks[1]] + 0x08,)
 
     if toks[0] == '[' and toks[2] == '+' and toks[4] == ']':
-        return regs[toks[3]] + 0x10, toks[1]
+        return (regs[toks[3]] + 0x10, literal(toks[1]))
 
     if toks[0] in sregs:
-        return sregs[toks[0]]
+        return (sregs[toks[0]],)
 
     if toks[0] == '[' and toks[2] == ']':
-        return 0x1e, toks[1]
+        return (0x1e, literal(toks[1]))
 
-    try:
-        literal = int(toks[0], 16)
-    except ValueError:
-        raise SyntaxError('Expected literal, got: {0}'.format(toks[0]))
+    lit = literal(toks[0])
+    if 0x00 < lit < 0x1f:
+        return (lit + 0x20,)
     else:
-        if 0x00 < literal < 0x1f:
-            return literal + 0x20
-        else:
-            return 0x1f, literal
+        return 0x1f, lit
 
     raise SyntaxError("Can't make sense of: {0}".format(toks))
 
@@ -126,7 +131,7 @@ def assemble(source):
     for i, inst in enumerate(insts):
         if inst[0] == 'JSR':
             low = 0x0
-            mid = 0x01
+            mid = [0x01]
             high = value(inst[1])
         else:
             # basic op
@@ -138,9 +143,15 @@ def assemble(source):
                 raise SyntaxError("Expected , in {0}".format(' '.join(inst)))
 
             mid = value(inst[1:comma])
-            high = value(inst[comma + 1:]) << 10
+            high = value(inst[comma + 1:])
 
-        binary.append(low + (mid << 4) + (high << 10))
+        binary.append(low + (mid[0] << 4) + (high[0] << 10))
+
+        if len(mid) == 2:
+            binary.append(mid[1])
+
+        if len(high) == 2:
+            binary.append(high[1])
 
     return binary
 
