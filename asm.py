@@ -81,14 +81,17 @@ def value(toks):
     if toks[0] in regs:
         return regs[toks[0]]
 
-    if toks[0] == '[' and toks[2] == ']' and toks[1] in sregs:
-        return sregs[toks[1]]
+    if toks[0] in sregs:
+        return sregs[toks[0]]
+
+    if toks[0] == '[' and toks[2] == ']' and toks[1] in regs:
+        return regs[toks[1]] + 0x08
 
     return -1
 
 
 def assemble(source):
-    ops = dict((e, i + 0x1) for i, e in enumerate(basic_op))
+    ops = dict((e, i + 0x01) for i, e in enumerate(basic_op))
 
     insts = lex(source)
     binary = []
