@@ -162,7 +162,7 @@ def assemble(source):
         if len(high) == 2:
             binary.append(high[1])
 
-    return binary
+    return binary + (len(binary) % 8) * [0x0000]
 
 
 def lex(source):
