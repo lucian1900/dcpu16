@@ -8,6 +8,10 @@ basic_op = ['SET', 'ADD', 'SUB', 'MUL', 'DIV', 'MOD', 'SHL', 'SHR', 'AND',
 reg_names = ['A', 'B', 'C', 'X', 'Y', 'Z', 'I', 'J']
 sreg_names = ['POP', 'PEEK', 'PUSH', 'SP', 'PC', 'O']
 
+ops = dict((e, i + 0x01) for i, e in enumerate(basic_op))
+regs = dict((e, i) for i, e in enumerate(reg_names))
+sregs = dict((e, i + 0x18) for i, e in enumerate(sreg_names))
+
 
 def disassemble(code):
     'Ported from https://gist.github.com/2300590'
@@ -84,9 +88,13 @@ def literal(source):
         return literal
 
 
-def value(toks):
-    regs = dict((e, i) for i, e in enumerate(reg_names))
-    sregs = dict((e, i + 0x18) for i, e in enumerate(sreg_names))
+def value(toks, labels):
+    if toks[0] in labels:
+        lab = toks[0]
+        if 0x00 < lab < 0x1f:
+            return (lab + 0x20,)
+        else:
+            return (0x1f, labels[toks[0]])
 
     if toks[0] in regs:
         return (regs[toks[0]],)
@@ -107,32 +115,32 @@ def value(toks):
     if 0x00 < lit < 0x1f:
         return (lit + 0x20,)
     else:
-        return 0x1f, lit
+        return (0x1f, lit)
 
     raise SyntaxError("Can't make sense of: {0}".format(toks))
 
 
 def assemble(source):
-    ops = dict((e, i + 0x01) for i, e in enumerate(basic_op))
-
     insts = lex(source)
     binary = []
 
     labels = {}
     for i, inst in enumerate(insts):
+        if not inst:
+            continue
+
         if inst[0] == ':':
-            if isinstance(inst, str):
-                labels[inst[1]] = i
-                insts[i] = insts[2:]
-            else:
-                raise SyntaxError("Expected string label, got: {0}" \
-                                    .format(inst))
+            labels[inst[1]] = i
+            insts[i] = insts[2:]
 
     for i, inst in enumerate(insts):
+        if not inst:
+            continue
+
         if inst[0] == 'JSR':
             low = 0x0
-            mid = [0x01]
-            high = value(inst[1])
+            mid = (0x01,)
+            high = value(inst[1], labels)
         else:
             # basic op
             low = ops[inst[0]]
@@ -140,10 +148,11 @@ def assemble(source):
             try:
                 comma = inst.index(',')
             except ValueError:
-                raise SyntaxError("Expected , in {0}".format(' '.join(inst)))
+                raise SyntaxError("Expected , at line {0} in: {1}".format(
+                    i, ' '.join(inst)))
 
-            mid = value(inst[1:comma])
-            high = value(inst[comma + 1:])
+            mid = value(inst[1:comma], labels)
+            high = value(inst[comma + 1:], labels)
 
         binary.append(low + (mid[0] << 4) + (high[0] << 10))
 
@@ -166,7 +175,7 @@ def lex(source):
 
         lines[i] = lines[i].split()
 
-    return filter(len, lines)
+    return lines
 
 
 if __name__ == '__main__':
