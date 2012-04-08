@@ -40,6 +40,12 @@ def test_assemble_disassembled():
     assert assemble(asm) == prog
 
 
+def test_assemble_disasseble_cycle():
+    code = assemble(asm)
+
+    assert assemble(disassemble(code)) == code
+
+
 def test_assemble_example():
     with open('example.s') as f:
         example = f.read()
