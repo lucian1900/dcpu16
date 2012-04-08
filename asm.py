@@ -90,11 +90,11 @@ def literal(source):
 
 def value(toks, labels):
     if toks[0] in labels:
-        lab = toks[0]
+        lab = labels[toks[0]]
         if 0x00 < lab < 0x1f:
             return (lab + 0x20,)
         else:
-            return (0x1f, labels[toks[0]])
+            return (0x1f, lab)
 
     if toks[0] in regs:
         return (regs[toks[0]],)
@@ -131,7 +131,7 @@ def assemble(source):
 
         if inst[0] == ':':
             labels[inst[1]] = i
-            insts[i] = insts[2:]
+            insts[i] = inst[2:]
 
     for i, inst in enumerate(insts):
         if not inst:
@@ -140,7 +140,7 @@ def assemble(source):
         if inst[0] == 'JSR':
             low = 0x0
             mid = (0x01,)
-            high = value(inst[1], labels)
+            high = value((inst[1],), labels)
         else:
             # basic op
             low = ops[inst[0]]
@@ -176,18 +176,3 @@ def lex(source):
         lines[i] = lines[i].split()
 
     return lines
-
-
-if __name__ == '__main__':
-    prog = [
-        0x7c01, 0x0030, 0x7de1, 0x1000, 0x0020, 0x7803, 0x1000, 0xc00d,
-        0x7dc1, 0x001a, 0xa861, 0x7c01, 0x2000, 0x2161, 0x2000, 0x8463,
-        0x806d, 0x7dc1, 0x000d, 0x9031, 0x7c10, 0x0018, 0x7dc1, 0x001a,
-        0x9037, 0x61c1, 0x7dc1, 0x001a, 0x0000, 0x0000, 0x0000, 0x0000]
-
-    asm = disassemble(prog)
-    print asm
-
-    print assemble(asm)
-
-    print assemble(":foo SET PC 0x01")
