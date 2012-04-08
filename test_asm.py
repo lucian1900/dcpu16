@@ -36,5 +36,12 @@ def test_assemble_comment():
     assert lex('SET X, 2 ; foo') == lex('SET X, 2 ; foo')
 
 
-def test_assemble():
+def test_assemble_disassembled():
     assert assemble(asm) == prog
+
+
+def test_assemble_example():
+    with open('example.s') as f:
+        example = f.read()
+
+    assert assemble(example) == prog
